@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="CorLink Accounting">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <rect x="118" y="154" width="276" height="204" rx="36" fill="#fff" opacity="0.95"/>
+  <rect x="118" y="154" width="276" height="58" rx="36" fill="#dbeafe"/>
+  <circle cx="352" cy="183" r="16" fill="#2563eb"/>
+  <path d="M170 288h172M170 246h108" stroke="#2563eb" stroke-width="16" stroke-linecap="round"/>
+  <path d="M256 346l-32 48h64l-32-48z" fill="#1d4ed8"/>
+  <path d="M156 118h48v36h-48zM308 118h48v36h-48z" fill="#fff" opacity="0.35" rx="8"/>
+</svg>

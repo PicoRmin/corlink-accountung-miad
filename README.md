@@ -1,64 +1,72 @@
-# مدیریت مالی (Finance Manager)
+# مدیریت مالی (CorLink Accounting)
 
-اپلیکیشن ساده مدیریت مالی با HTML، CSS و JavaScript خالص.
+اپلیکیشن کامل مدیریت مالی فارسی — PWA، موبایل‌فرست، GitHub Pages.
 
 ## امکانات
 
-- ثبت تراکنش (دریافت / پرداخت)
-- روش‌های پرداخت: نقد، چک، حواله
-- نمایش موجودی و لیست تراکنش‌ها
-- جستجو در تراکنش‌ها
-- یادآوری چک‌های نزدیک به سررسید
-- نمودار دریافت و پرداخت
-- ماشین‌حساب
-- پشتیبان‌گیری و بازیابی داده (Export / Import)
+### فاز ۱
+- حذف و ویرایش تراکنش (با Undo)
+- تاریخ شمسی (جلالی)
+- Export: JSON، CSV، چاپ PDF
 
-داده‌ها در `localStorage` مرورگر ذخیره می‌شوند.
+### فاز ۲
+- PWA (نصب روی موبایل، آفلاین)
+- دسته‌بندی تراکنش‌ها + نمودار میله‌ای
+- داشبورد پیشرفته (KPI، نمودار خطی موجودی، مقایسه ماهانه)
+
+### فاز ۳
+- مدیریت چک (در انتظار / وصول / برگشتی)
+- چند حساب + انتقال بین حساب‌ها
+- بودجه‌بندی ماهانه با progress bar
+
+### فاز ۴ و بیشتر
+- Sync ابری (JSONBin.io) + کد همگام‌سازی
+- OCR فاکتور (Tesseract.js)
+- i18n فارسی/انگلیسی
+- تم روشن/تاریک/خودکار + رنگ آبی/سبز/بنفش
+- پشتیبان رمزنگاری‌شده (AES-GCM)
+- Onboarding، میانبرهای کیبورد، Pull-to-refresh
+- اعلان چک (Notification API)
+
+## مستندات
+
+| سند | توضیح |
+|-----|--------|
+| [docs/TECHNICAL.md](docs/TECHNICAL.md) | معماری، API، deploy |
+| [docs/IDEAS.md](docs/IDEAS.md) | وضعیت پیاده‌سازی و ایده‌های آینده |
 
 ## اجرای محلی
-
-فایل `index.html` را در مرورگر باز کنید، یا از یک سرور ساده استفاده کنید:
 
 ```bash
 npx serve .
 ```
 
-> به‌خاطر ES Modules، باز کردن مستقیم فایل (`file://`) ممکن است در بعضی مرورگرها کار نکند. استفاده از سرور محلی توصیه می‌شود.
+## استقرار GitHub Pages
 
-## استقرار روی GitHub Pages
+1. Push به GitHub
+2. **Settings → Pages → Source:** GitHub Actions
+3. آدرس: `https://USERNAME.github.io/corlink-accountung-miad/`
 
-1. مخزن را در GitHub بسازید و کد را push کنید:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/USERNAME/corlink-accountung-miad.git
-git push -u origin main
-```
-
-2. در GitHub بروید به **Settings → Pages**
-3. در **Build and deployment**، Source را روی **GitHub Actions** بگذارید
-4. با push به شاخه `main`، workflow به‌صورت خودکار سایت را deploy می‌کند
-
-آدرس سایت:
-
-```
-https://USERNAME.github.io/corlink-accountung-miad/
-```
-
-## ساختار پروژه
+## ساختار
 
 ```
 ├── index.html
+├── manifest.json, sw.js
 ├── css/style.css
-└── js/
-    ├── app.js
-    ├── storage.js
-    ├── transactions.js
-    ├── ui.js
-    ├── reports.js
-    ├── checks.js
-    └── calculator.js
+├── js/          (20+ ماژول)
+├── locales/     (fa.json, en.json)
+├── icons/
+└── docs/
 ```
+
+## Sync ابری
+
+در تنظیمات، Bin ID و API Key از [JSONBin.io](https://jsonbin.io) را وارد کنید.
+
+## میانبرها
+
+| کلید | عمل |
+|------|-----|
+| `Ctrl+N` | ثبت تراکنش |
+| `/` | جستجو |
+| `1-5` | تعویض پنل |

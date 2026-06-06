@@ -1,125 +1,643 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
-    <head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <title data-i18n="app.subtitle">مدیریت مالی شخصی</title>
+    <script>
+        (function () {
+            var p = localStorage.getItem("financeTheme") || "system";
+            var d = p === "dark" || (p === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+            document.documentElement.setAttribute("data-theme", d ? "dark" : "light");
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = d ? "#1d4ed8" : "#2563eb";
+        })();
+    </script>
+    <script>
+        (function () {
+            var c = localStorage.getItem("financeColorTheme") || "blue";
+            if (["blue", "green", "purple"].indexOf(c) === -1) c = "blue";
+            document.documentElement.setAttribute("data-color-theme", c);
+        })();
+    </script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>مدیریت مالی</title>
+<body>
 
-        <link rel="stylesheet" href="css/style.css">
+    <header class="app-header">
+        <div class="header-top">
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true">💰</span>
+                <div>
+                    <h1 data-i18n="app.subtitle">مدیریت مالی شخصی</h1>
+                    <p class="brand-sub" data-i18n="app.title">CorLink Accounting</p>
+                </div>
+            </div>
+            <button type="button" id="themeQuickToggle" class="theme-quick-toggle" aria-label="تغییر تم">🌙</button>
+        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <div class="header-controls">
+            <label class="account-selector-label" for="accountSelector">
+                <span data-i18n="form.account">حساب</span>
+            </label>
+            <select id="accountSelector" class="account-selector" aria-label="انتخاب حساب"></select>
+        </div>
 
-    </head>
+        <div class="balance-card">
+            <span class="balance-label" data-i18n="stats.balance">موجودی</span>
+            <div id="balance" class="balance-value">۰</div>
+            <div class="stats-row">
+                <div class="stat">
+                    <span class="stat-label" data-i18n="stats.income">دریافت</span>
+                    <span id="statIncome" class="stat-value income">۰</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-label" data-i18n="stats.expense">پرداخت</span>
+                    <span id="statExpense" class="stat-value expense">۰</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-label" data-i18n="stats.totalBalance">موجودی کل</span>
+                    <span id="statTotal" class="stat-value">۰</span>
+                </div>
+            </div>
+        </div>
 
-    <body>
+        <div id="kpiRow" class="kpi-row">
+            <div class="kpi-card">
+                <span class="kpi-label" data-i18n="kpi.avgDailyExpense">میانگین هزینه روزانه</span>
+                <span id="kpiAvgDailyExpense" class="kpi-value">۰</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" data-i18n="kpi.maxIncome">بیشترین دریافت</span>
+                <span id="kpiMaxIncome" class="kpi-value income">۰</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" data-i18n="kpi.maxExpense">بیشترین پرداخت</span>
+                <span id="kpiMaxExpense" class="kpi-value expense">۰</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" data-i18n="kpi.monthCompare">مقایسه ماهانه</span>
+                <span id="kpiMonthCompare" class="kpi-value">—</span>
+            </div>
+        </div>
+    </header>
 
-        <header>
+    <main class="app-main">
 
-            <h1>مدیریت مالی</h1>
+        <!-- داشبورد -->
+        <section id="panel-dashboard" class="panel active" aria-label="داشبورد">
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="chart.incomeExpense">دریافت و پرداخت</h2>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="financeChart"></canvas>
+                </div>
+                <div id="chartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
+            </div>
 
-            <div id="balance"></div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="form.category">دسته‌بندی</h2>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div id="categoryChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
+            </div>
 
-        </header>
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="stats.balance">موجودی</h2>
+                </div>
+                <div class="chart-wrap chart-wrap-wide">
+                    <canvas id="balanceLineChart"></canvas>
+                </div>
+                <div id="balanceLineChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
+            </div>
 
-        <section class="card">
+            <div id="budgetSection" class="card">
+                <div class="card-header">
+                    <h2 data-i18n="budget.title">بودجه‌بندی</h2>
+                </div>
+                <div id="budgetProgress" class="budget-progress-list"></div>
+                <div id="budgetEmpty" class="empty-state hidden" data-i18n="budget.limit">سقف ماهانه</div>
+            </div>
 
-            <h2>ثبت تراکنش</h2>
-
-            <input id="desc" placeholder="توضیحات">
-
-            <input id="amount" type="number" placeholder="مبلغ">
-
-            <select id="type">
-                <option value="income">دریافت</option>
-                <option value="expense">پرداخت</option>
-            </select>
-
-            <select id="method">
-                <option value="cash">نقد</option>
-                <option value="check">چک</option>
-                <option value="transfer">حواله</option>
-            </select>
-
-            <input id="checkNumber" placeholder="شماره چک">
-
-            <input id="bank" placeholder="بانک">
-
-            <input id="dueDate" type="date">
-
-            <button id="addTransaction">ثبت</button>
-
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="check.reminder">یادآوری چک</h2>
+                    <span class="badge" id="checkBadge">۰</span>
+                </div>
+                <div id="checkReminder" class="reminder-list"></div>
+            </div>
         </section>
 
-        <section class="card">
+        <!-- تراکنش‌ها -->
+        <section id="panel-transactions" class="panel" aria-label="تراکنش‌ها">
+            <div class="filters-row">
+                <div class="search-box">
+                    <span class="search-icon" aria-hidden="true">🔍</span>
+                    <input id="search" type="search" data-i18n-placeholder="search.placeholder"
+                        placeholder="جستجو در تراکنش‌ها…" autocomplete="off">
+                </div>
 
-            <h2>جستجو</h2>
+                <div class="filter-group">
+                    <label for="filterType" data-i18n="form.type">نوع</label>
+                    <select id="filterType">
+                        <option value="" data-i18n="form.type">نوع</option>
+                        <option value="income" data-i18n="txType.income">دریافت</option>
+                        <option value="expense" data-i18n="txType.expense">پرداخت</option>
+                        <option value="transfer" data-i18n="txType.transfer">انتقال</option>
+                    </select>
+                </div>
 
-            <input id="search">
+                <div class="filter-group">
+                    <label for="filterMethod" data-i18n="form.method">روش</label>
+                    <select id="filterMethod">
+                        <option value="" data-i18n="form.method">روش</option>
+                        <option value="cash" data-i18n="method.cash">نقد</option>
+                        <option value="check" data-i18n="method.check">چک</option>
+                        <option value="transfer" data-i18n="method.transfer">حواله</option>
+                    </select>
+                </div>
 
+                <div class="filter-group">
+                    <label for="filterCategory" data-i18n="form.category">دسته‌بندی</label>
+                    <select id="filterCategory">
+                        <option value="" data-i18n="form.category">دسته‌بندی</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filterFromDate" data-i18n="form.date">تاریخ</label>
+                    <input id="filterFromDate" type="text" placeholder="۱۴۰۴/۰۱/۰۱" autocomplete="off">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filterToDate" data-i18n="form.date">تاریخ</label>
+                    <input id="filterToDate" type="text" placeholder="۱۴۰۴/۱۲/۲۹" autocomplete="off">
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy" data-i18n="tx.count">تعداد تراکنش</label>
+                    <select id="sortBy">
+                        <option value="date-desc" data-i18n="form.date">تاریخ</option>
+                        <option value="date-asc" data-i18n="form.date">تاریخ</option>
+                        <option value="amount-desc" data-i18n="form.amount">مبلغ (ریال)</option>
+                        <option value="amount-asc" data-i18n="form.amount">مبلغ (ریال)</option>
+                    </select>
+                </div>
+
+                <button type="button" id="btnClearFilters" class="btn btn-secondary" data-i18n="form.reset">پاک کردن</button>
+            </div>
+
+            <div class="pagination-row">
+                <button type="button" id="btnPrevPage" class="btn btn-secondary" data-i18n="pagination.prev">قبلی</button>
+                <span id="pageInfo" data-i18n="pagination.page">صفحه ۱</span>
+                <button type="button" id="btnNextPage" class="btn btn-secondary" data-i18n="pagination.next">بعدی</button>
+            </div>
+
+            <div class="card card-flush">
+                <div class="card-header">
+                    <h2 data-i18n="nav.transactions">تراکنش‌ها</h2>
+                    <span id="txCount" class="badge muted">۰</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="export.colDate">تاریخ</th>
+                                <th data-i18n="export.colDesc">توضیحات</th>
+                                <th data-i18n="export.colAmount">مبلغ</th>
+                                <th data-i18n="export.colType">نوع</th>
+                                <th data-i18n="export.colMethod">روش</th>
+                                <th data-i18n="export.colCategory">دسته</th>
+                                <th data-i18n="export.colAccount">حساب</th>
+                                <th data-i18n="export.colDueDate">سررسید</th>
+                                <th data-i18n="tx.edit">ویرایش</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable"></tbody>
+                    </table>
+                </div>
+                <div id="transactionsCards" class="tx-cards"></div>
+                <div id="txEmpty" class="empty-state hidden" data-i18n="search.noResults">تراکنشی یافت نشد</div>
+            </div>
         </section>
 
-        <section class="card">
+        <!-- ثبت تراکنش -->
+        <section id="panel-add" class="panel" aria-label="ثبت تراکنش">
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="nav.add">ثبت</h2>
+                </div>
 
-            <h2>تراکنش‌ها</h2>
+                <form id="txForm" class="form-grid" novalidate>
+                    <div class="form-group full">
+                        <label for="desc" data-i18n="form.desc">توضیحات</label>
+                        <input id="desc" placeholder="مثلاً: فروش کالا، اجاره..." required>
+                    </div>
 
-            <table>
+                    <div class="form-group">
+                        <label for="amount" data-i18n="form.amount">مبلغ (ریال)</label>
+                        <input id="amount" type="number" inputmode="numeric" placeholder="۰" min="0" required>
+                    </div>
 
-                <thead>
-                    <tr>
-                        <th>تاریخ</th>
-                        <th>توضیح</th>
-                        <th>مبلغ</th>
-                        <th>نوع</th>
-                        <th>روش</th>
-                        <th>سررسید</th>
-                    </tr>
-                </thead>
+                    <div class="form-group">
+                        <label for="type" data-i18n="form.type">نوع</label>
+                        <select id="type">
+                            <option value="income" data-i18n="txType.income">دریافت</option>
+                            <option value="expense" data-i18n="txType.expense">پرداخت</option>
+                            <option value="transfer" data-i18n="txType.transfer">انتقال</option>
+                        </select>
+                    </div>
 
-                <tbody id="transactionsTable"></tbody>
+                    <div class="form-group">
+                        <label for="category" data-i18n="form.category">دسته‌بندی</label>
+                        <select id="category"></select>
+                    </div>
 
-            </table>
+                    <div class="form-group">
+                        <label for="txAccount" data-i18n="form.account">حساب</label>
+                        <select id="txAccount"></select>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="txDate" data-i18n="form.date">تاریخ</label>
+                        <input id="txDate" type="text" placeholder="1404/03/17" autocomplete="off">
+                    </div>
+
+                    <div id="transferFields" class="transfer-fields hidden full">
+                        <div class="form-group full">
+                            <label for="transferToAccount" data-i18n="form.transferTo">انتقال به</label>
+                            <select id="transferToAccount"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label data-i18n="form.method">روش</label>
+                        <div class="method-tabs" role="group" aria-label="روش پرداخت">
+                            <button type="button" class="method-tab active" data-method="cash" data-i18n="method.cash">نقد</button>
+                            <button type="button" class="method-tab" data-method="check" data-i18n="method.check">چک</button>
+                            <button type="button" class="method-tab" data-method="transfer" data-i18n="method.transfer">حواله</button>
+                        </div>
+                        <input type="hidden" id="method" value="cash">
+                    </div>
+
+                    <div id="checkFields" class="check-fields hidden">
+                        <div class="form-group">
+                            <label for="checkNumber" data-i18n="form.checkNumber">شماره چک</label>
+                            <input id="checkNumber" placeholder="شماره چک">
+                        </div>
+                        <div class="form-group">
+                            <label for="bank" data-i18n="form.bank">بانک</label>
+                            <input id="bank" placeholder="نام بانک">
+                        </div>
+                        <div class="form-group full">
+                            <label for="dueDateJalali" data-i18n="form.dueDate">سررسید</label>
+                            <input id="dueDateJalali" type="text" placeholder="1404/06/01" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group full ocr-section">
+                        <label for="ocrFile" data-i18n="ocr.scan">اسکن فاکتور</label>
+                        <div class="ocr-row">
+                            <input id="ocrFile" type="file" accept="image/*">
+                            <button type="button" id="scanReceipt" class="btn btn-secondary" data-i18n="ocr.scan">اسکن فاکتور</button>
+                        </div>
+                        <p id="ocrResult" class="ocr-result hidden" data-i18n="ocr.result">مبلغ استخراج‌شده</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full" data-i18n="form.submit">
+                        ثبت تراکنش
+                    </button>
+                </form>
+            </div>
         </section>
 
-        <section class="card">
-
-            <h2>داشبورد مالی</h2>
-
-            <canvas id="financeChart"></canvas>
-
+        <!-- ماشین‌حساب -->
+        <section id="panel-calculator" class="panel" aria-label="ماشین‌حساب">
+            <div class="card calc-card">
+                <div class="calc-display-wrap">
+                    <div id="calcExpression" class="calc-expression"></div>
+                    <input id="calcDisplay" class="calc-display" readonly inputmode="none"
+                        aria-label="نمایش ماشین‌حساب">
+                </div>
+                <div id="calculator" class="calc-grid"></div>
+                <p class="calc-hint">دوبار کلیک روی نتیجه → انتقال به فرم مبلغ</p>
+                <div class="calc-history">
+                    <div class="calc-history-header">
+                        <h3 data-i18n="nav.calculator">ماشین‌حساب</h3>
+                        <button type="button" id="clearHistory" class="btn-text" data-i18n="form.reset">پاک کردن</button>
+                    </div>
+                    <ul id="calcHistory" class="calc-history-list"></ul>
+                </div>
+            </div>
         </section>
 
-        <section class="card">
+        <!-- تنظیمات -->
+        <section id="panel-settings" class="panel" aria-label="تنظیمات">
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="settings.theme">تم رنگی</h2>
+                </div>
+                <p class="card-desc">تم رابط کاربری و رنگ اصلی را انتخاب کنید.</p>
+                <div class="theme-tabs" role="group" aria-label="انتخاب تم">
+                    <button type="button" class="theme-tab" data-theme="light" data-i18n="settings.themeLight">☀️ روشن</button>
+                    <button type="button" class="theme-tab" data-theme="dark" data-i18n="settings.themeDark">🌙 تاریک</button>
+                    <button type="button" class="theme-tab active" data-theme="system" data-i18n="settings.themeSystem">💻 خودکار</button>
+                </div>
+                <div class="color-theme-tabs" role="group" aria-label="رنگ تم">
+                    <button type="button" class="color-theme-tab active" data-color-theme="blue">🔵 آبی</button>
+                    <button type="button" class="color-theme-tab" data-color-theme="green">🟢 سبز</button>
+                    <button type="button" class="color-theme-tab" data-color-theme="purple">🟣 بنفش</button>
+                </div>
+            </div>
 
-            <h2>یادآوری چک</h2>
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="settings.language">زبان</h2>
+                </div>
+                <select id="languageSelect" class="language-select">
+                    <option value="fa">فارسی</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
 
-            <div id="checkReminder"></div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="account.title">حساب‌ها</h2>
+                </div>
+                <ul id="accountsList" class="accounts-list"></ul>
+                <form id="addAccountForm" class="form-grid inline-form">
+                    <div class="form-group">
+                        <label for="accountName" data-i18n="account.add">افزودن حساب</label>
+                        <input id="accountName" type="text" placeholder="نام حساب">
+                    </div>
+                    <button type="button" id="btnAddAccount" class="btn btn-secondary" data-i18n="account.add">افزودن حساب</button>
+                </form>
+                <hr class="card-divider">
+                <h3 class="card-subtitle" data-i18n="account.transfer">انتقال بین حساب‌ها</h3>
+                <form id="accountTransferForm" class="form-grid inline-form">
+                    <div class="form-group">
+                        <label for="transferFrom" data-i18n="form.transferFrom">انتقال از</label>
+                        <select id="transferFrom"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transferTo" data-i18n="form.transferTo">انتقال به</label>
+                        <select id="transferTo"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transferAmount" data-i18n="form.amount">مبلغ (ریال)</label>
+                        <input id="transferAmount" type="number" inputmode="numeric" min="0" placeholder="۰">
+                    </div>
+                    <button type="button" id="btnTransfer" class="btn btn-primary" data-i18n="account.transfer">انتقال بین حساب‌ها</button>
+                </form>
+            </div>
 
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="budget.title">بودجه‌بندی</h2>
+                </div>
+                <form id="budgetForm" class="form-grid inline-form">
+                    <div class="form-group">
+                        <label for="budgetCategory" data-i18n="form.category">دسته‌بندی</label>
+                        <select id="budgetCategory"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetLimit" data-i18n="budget.limit">سقف ماهانه</label>
+                        <input id="budgetLimit" type="number" inputmode="numeric" min="0" placeholder="۰">
+                    </div>
+                    <button type="button" id="btnSetBudget" class="btn btn-secondary" data-i18n="budget.title">بودجه‌بندی</button>
+                </form>
+                <ul id="budgetList" class="budget-list"></ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="settings.backup">پشتیبان‌گیری</h2>
+                </div>
+                <p class="card-desc" data-i18n="settings.export">خروجی JSON</p>
+                <div class="action-row">
+                    <button type="button" id="export" class="btn btn-secondary">
+                        <span aria-hidden="true">📥</span>
+                        <span data-i18n="settings.export">خروجی JSON</span>
+                    </button>
+                    <label class="btn btn-secondary import-label">
+                        <span aria-hidden="true">📤</span>
+                        <span data-i18n="settings.import">بازیابی JSON</span>
+                        <input type="file" id="import" accept=".json,application/json" hidden>
+                    </label>
+                    <button type="button" id="exportCsv" class="btn btn-secondary">
+                        <span aria-hidden="true">📊</span>
+                        <span data-i18n="settings.exportCsv">خروجی CSV</span>
+                    </button>
+                    <button type="button" id="printReport" class="btn btn-secondary">
+                        <span aria-hidden="true">🖨️</span>
+                        <span data-i18n="settings.print">چاپ گزارش</span>
+                    </button>
+                </div>
+                <div class="encrypted-backup">
+                    <h3 class="card-subtitle" data-i18n="settings.encryptedBackup">پشتیبان رمزنگاری‌شده</h3>
+                    <div class="form-grid inline-form">
+                        <div class="form-group">
+                            <label for="exportPassword" data-i18n="settings.encryptedBackup">پشتیبان رمزنگاری‌شده</label>
+                            <input id="exportPassword" type="password" autocomplete="new-password" placeholder="••••">
+                        </div>
+                        <button type="button" id="btnEncryptedExport" class="btn btn-secondary" data-i18n="settings.export">خروجی JSON</button>
+                    </div>
+                    <div class="form-grid inline-form">
+                        <label class="btn btn-secondary import-label">
+                            <span data-i18n="settings.import">بازیابی JSON</span>
+                            <input type="file" id="importEncrypted" accept=".json,application/json" hidden>
+                        </label>
+                        <div class="form-group">
+                            <label for="encryptedImportPassword" data-i18n="settings.encryptedBackup">پشتیبان رمزنگاری‌شده</label>
+                            <input id="encryptedImportPassword" type="password" autocomplete="current-password" placeholder="••••">
+                        </div>
+                        <button type="button" id="btnEncryptedImport" class="btn btn-secondary" data-i18n="settings.import">بازیابی JSON</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="settings.sync">همگام‌سازی ابری</h2>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="syncBinId" data-i18n="settings.binId">شناسه JSONBin</label>
+                        <input id="syncBinId" type="text" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="syncApiKey" data-i18n="settings.apiKey">کلید API</label>
+                        <input id="syncApiKey" type="password" autocomplete="off">
+                    </div>
+                </div>
+                <div class="action-row">
+                    <button type="button" id="btnPushCloud" class="btn btn-primary" data-i18n="settings.syncPush">ارسال به ابر</button>
+                    <button type="button" id="btnPullCloud" class="btn btn-secondary" data-i18n="settings.syncPull">دریافت از ابر</button>
+                    <button type="button" id="btnCopySyncCode" class="btn btn-secondary" data-i18n="settings.syncCode">کد همگام‌سازی</button>
+                </div>
+                <div class="form-group full">
+                    <label for="importSyncCode" data-i18n="settings.syncCode">کد همگام‌سازی</label>
+                    <textarea id="importSyncCode" rows="4" placeholder="…"></textarea>
+                </div>
+                <button type="button" id="btnImportSyncCode" class="btn btn-secondary full" data-i18n="settings.import">بازیابی JSON</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="check.reminder">یادآوری چک</h2>
+                </div>
+                <p class="card-desc">برای دریافت اعلان سررسید چک، مجوز نوتیفیکیشن را فعال کنید.</p>
+                <button type="button" id="btnEnableNotifications" class="btn btn-secondary full">
+                    🔔 فعال‌سازی اعلان چک
+                </button>
+            </div>
+
+            <div class="card">
+                <button type="button" id="btnRestartTour" class="btn btn-secondary full" data-i18n="settings.restartTour">نمایش مجدد راهنما</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="settings.about">درباره</h2>
+                </div>
+                <p class="card-desc" data-i18n="app.subtitle">مدیریت مالی شخصی</p>
+                <p class="card-desc">
+                    <a href="docs/TECHNICAL.md" class="doc-link">مستندات فنی</a>
+                    ·
+                    <a href="docs/IDEAS.md" class="doc-link">پیشنهادات و ایده‌ها</a>
+                </p>
+            </div>
         </section>
 
-        <section class="card">
+    </main>
 
-            <h2>ماشین حساب</h2>
+    <nav class="bottom-nav" aria-label="منوی اصلی">
+        <button type="button" class="nav-item active" data-panel="dashboard" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">📊</span>
+            <span class="nav-label" data-i18n="nav.dashboard">داشبورد</span>
+        </button>
+        <button type="button" class="nav-item" data-panel="transactions">
+            <span class="nav-icon" aria-hidden="true">📋</span>
+            <span class="nav-label" data-i18n="nav.transactions">تراکنش‌ها</span>
+        </button>
+        <button type="button" class="nav-item nav-item-fab" data-panel="add" data-i18n-title="nav.add" aria-label="ثبت">
+            <span class="nav-icon" aria-hidden="true">＋</span>
+        </button>
+        <button type="button" class="nav-item" data-panel="calculator">
+            <span class="nav-icon" aria-hidden="true">🔢</span>
+            <span class="nav-label" data-i18n="nav.calculator">ماشین‌حساب</span>
+        </button>
+        <button type="button" class="nav-item" data-panel="settings">
+            <span class="nav-icon" aria-hidden="true">⚙️</span>
+            <span class="nav-label" data-i18n="nav.settings">تنظیمات</span>
+        </button>
+    </nav>
 
-            <input id="calcDisplay">
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay hidden" aria-hidden="true"></div>
 
-            <div id="calculator"></div>
+    <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <div class="modal-content card">
+            <div class="card-header">
+                <h2 id="editModalTitle" data-i18n="tx.edit">ویرایش</h2>
+            </div>
+            <form id="editForm" class="form-grid" novalidate>
+                <div class="form-group full">
+                    <label for="editDesc" data-i18n="form.desc">توضیحات</label>
+                    <input id="editDesc" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAmount" data-i18n="form.amount">مبلغ (ریال)</label>
+                    <input id="editAmount" type="number" inputmode="numeric" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editType" data-i18n="form.type">نوع</label>
+                    <select id="editType">
+                        <option value="income" data-i18n="txType.income">دریافت</option>
+                        <option value="expense" data-i18n="txType.expense">پرداخت</option>
+                        <option value="transfer" data-i18n="txType.transfer">انتقال</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory" data-i18n="form.category">دسته‌بندی</label>
+                    <select id="editCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label for="editAccount" data-i18n="form.account">حساب</label>
+                    <select id="editAccount"></select>
+                </div>
+                <div class="form-group">
+                    <label for="editDate" data-i18n="form.date">تاریخ</label>
+                    <input id="editDate" type="text" placeholder="1404/03/17" autocomplete="off">
+                </div>
+                <div id="editTransferFields" class="transfer-fields hidden full">
+                    <div class="form-group full">
+                        <label for="editTransferToAccount" data-i18n="form.transferTo">انتقال به</label>
+                        <select id="editTransferToAccount"></select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <label data-i18n="form.method">روش</label>
+                    <div class="method-tabs edit-method-tabs" role="group">
+                        <button type="button" class="method-tab active" data-method="cash" data-i18n="method.cash">نقد</button>
+                        <button type="button" class="method-tab" data-method="check" data-i18n="method.check">چک</button>
+                        <button type="button" class="method-tab" data-method="transfer" data-i18n="method.transfer">حواله</button>
+                    </div>
+                    <input type="hidden" id="editMethod" value="cash">
+                </div>
+                <div id="editCheckFields" class="check-fields hidden">
+                    <div class="form-group">
+                        <label for="editCheckNumber" data-i18n="form.checkNumber">شماره چک</label>
+                        <input id="editCheckNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBank" data-i18n="form.bank">بانک</label>
+                        <input id="editBank">
+                    </div>
+                    <div class="form-group full">
+                        <label for="editDueDateJalali" data-i18n="form.dueDate">سررسید</label>
+                        <input id="editDueDateJalali" type="text" placeholder="1404/06/01" autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="btnCancelEdit" class="btn btn-secondary" data-i18n="confirm.no">خیر</button>
+                    <button type="submit" id="btnSaveEdit" class="btn btn-primary" data-i18n="form.submit">ثبت تراکنش</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        </section>
+    <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+        <div class="modal-content card">
+            <div class="card-header">
+                <h2 id="confirmModalTitle" data-i18n="tx.delete">حذف</h2>
+            </div>
+            <p id="confirmMessage" data-i18n="tx.deleteConfirm">این تراکنش حذف شود؟</p>
+            <div class="modal-actions">
+                <button type="button" id="btnConfirmNo" class="btn btn-secondary" data-i18n="confirm.no">خیر</button>
+                <button type="button" id="btnConfirmYes" class="btn btn-danger" data-i18n="confirm.yes">بله</button>
+            </div>
+        </div>
+    </div>
 
-        <section class="card">
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-            <h2>Backup</h2>
+    <script type="module" src="js/app.js"></script>
+</body>
 
-            <button id="export">Export</button>
-
-            <input type="file" id="import">
-
-        </section>
-
-        <script type="module" src="js/app.js"></script>
-
-    </body>
 </html>
