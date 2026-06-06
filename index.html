@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+    <head>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>مدیریت مالی</title>
+
+        <link rel="stylesheet" href="css/style.css">
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    </head>
+
+    <body>
+
+        <header>
+
+            <h1>مدیریت مالی</h1>
+
+            <div id="balance"></div>
+
+        </header>
+
+        <section class="card">
+
+            <h2>ثبت تراکنش</h2>
+
+            <input id="desc" placeholder="توضیحات">
+
+            <input id="amount" type="number" placeholder="مبلغ">
+
+            <select id="type">
+                <option value="income">دریافت</option>
+                <option value="expense">پرداخت</option>
+            </select>
+
+            <select id="method">
+                <option value="cash">نقد</option>
+                <option value="check">چک</option>
+                <option value="transfer">حواله</option>
+            </select>
+
+            <input id="checkNumber" placeholder="شماره چک">
+
+            <input id="bank" placeholder="بانک">
+
+            <input id="dueDate" type="date">
+
+            <button id="addTransaction">ثبت</button>
+
+        </section>
+
+        <section class="card">
+
+            <h2>جستجو</h2>
+
+            <input id="search">
+
+        </section>
+
+        <section class="card">
+
+            <h2>تراکنش‌ها</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>توضیح</th>
+                        <th>مبلغ</th>
+                        <th>نوع</th>
+                        <th>روش</th>
+                        <th>سررسید</th>
+                    </tr>
+                </thead>
+
+                <tbody id="transactionsTable"></tbody>
+
+            </table>
+
+        </section>
+
+        <section class="card">
+
+            <h2>داشبورد مالی</h2>
+
+            <canvas id="financeChart"></canvas>
+
+        </section>
+
+        <section class="card">
+
+            <h2>یادآوری چک</h2>
+
+            <div id="checkReminder"></div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>ماشین حساب</h2>
+
+            <input id="calcDisplay">
+
+            <div id="calculator"></div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Backup</h2>
+
+            <button id="export">Export</button>
+
+            <input type="file" id="import">
+
+        </section>
+
+        <script type="module" src="js/app.js"></script>
+
+    </body>
+</html>
