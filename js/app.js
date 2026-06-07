@@ -804,4 +804,10 @@ export async function init() {
     showOnboarding({ switchPanel })
 }
 
-init()
+init().catch(err => {
+    console.error("Init failed:", err)
+    const banner = document.createElement("div")
+    banner.className = "init-error-banner"
+    banner.innerHTML = `<strong>خطا در بارگذاری برنامه</strong><p>${err.message || err}</p><button type="button" onclick="location.reload()">بارگذاری مجدد</button>`
+    document.body.prepend(banner)
+})
