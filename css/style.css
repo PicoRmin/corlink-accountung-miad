@@ -112,6 +112,7 @@ body {
     line-height: 1.6;
     min-height: 100dvh;
     padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+    overflow-x: hidden;
 }
 
 /* ── Header ── */
@@ -125,9 +126,10 @@ body {
 }
 
 .app-main {
-    max-width: 720px;
+    width: 100%;
+    max-width: min(100%, 720px);
     margin: 12px auto 0;
-    padding: 0 16px;
+    padding: 0 clamp(12px, 3vw, 24px);
     position: relative;
     z-index: 1;
 }
@@ -266,10 +268,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     margin-bottom: 16px;
 }
 
 .card-header h2 {
+    flex: 1;
+    min-width: 0;
     font-size: 1rem;
     font-weight: 600;
 }
@@ -664,8 +669,15 @@ select {
 
 .chart-wrap {
     position: relative;
-    max-width: 280px;
+    width: 100%;
+    max-width: min(100%, 320px);
     margin: 0 auto;
+    aspect-ratio: 1 / 1;
+}
+
+.chart-wrap-wide {
+    max-width: 100%;
+    aspect-ratio: 2 / 1;
 }
 
 /* ── Reminders ── */
@@ -1004,6 +1016,60 @@ select {
     .action-row {
         flex-direction: column;
     }
+
+    .filters-row {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-accounts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .app-header {
+        padding: 14px clamp(12px, 3vw, 16px) 10px;
+    }
+
+    .balance-value {
+        font-size: clamp(1.5rem, 8vw, 2rem);
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .modal-content {
+        width: calc(100% - 24px);
+        margin: 0 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .nav-label {
+        display: none;
+    }
+
+    .nav-item {
+        font-size: 0.6rem;
+        padding: 6px 2px;
+    }
+
+    .nav-icon {
+        font-size: 1.45rem;
+    }
+
+    .nav-item-fab .nav-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 1.4rem;
+    }
+
+    .dashboard-accounts-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (min-width: 641px) {
@@ -1031,13 +1097,44 @@ select {
     }
 }
 
+@media (min-width: 768px) {
+    .app-main {
+        max-width: min(100%, 900px);
+        padding: 0 clamp(16px, 4vw, 28px);
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filters-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .chart-wrap {
+        max-width: 100%;
+    }
+
+    .dashboard-hero .kpi-row {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .compare-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (min-width: 900px) {
     .app-main {
-        max-width: 960px;
+        max-width: min(100%, 960px);
     }
 
     .bottom-nav {
         max-width: 960px;
+    }
+
+    #panel-add .form-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -1147,12 +1244,6 @@ select {
 #pageInfo {
     font-size: 0.85rem;
     color: var(--text-muted);
-}
-
-/* ── Chart wide ── */
-
-.chart-wrap-wide {
-    max-width: 100%;
 }
 
 /* ── Budget ── */
@@ -2037,14 +2128,19 @@ body.modal-open {
     /* Dashboard two-column grid */
     #panel-dashboard.active {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
         align-items: start;
     }
 
     #panel-dashboard .dashboard-hero,
-    #panel-dashboard #monthCompareCards {
+    #panel-dashboard #monthCompareCards,
+    #panel-dashboard .dashboard-widgets {
         grid-column: 1 / -1;
+    }
+
+    #panel-dashboard .dashboard-widgets {
+        display: contents;
     }
 
     #panel-dashboard .dashboard-hero {
@@ -2063,11 +2159,11 @@ body.modal-open {
         align-content: start;
     }
 
-    #panel-dashboard .card {
+    #panel-dashboard .dashboard-widget {
         margin-bottom: 0;
     }
 
-    #panel-dashboard .card:has(#balanceLineChart) {
+    #panel-dashboard .dashboard-widget--wide {
         grid-column: 1 / -1;
     }
 
@@ -2125,11 +2221,124 @@ body.modal-open {
 }
 
 @media (min-width: 1280px) {
+    .app-main {
+        max-width: min(100%, 1280px);
+    }
+
+    #panel-dashboard.active {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #panel-dashboard .dashboard-hero {
+        grid-template-columns: 1.4fr 1fr;
+    }
+
     #panel-dashboard .dashboard-hero .kpi-row {
         grid-template-columns: repeat(4, 1fr);
     }
 
+    #panel-dashboard .dashboard-widget--wide {
+        grid-column: 1 / -1;
+    }
+
     .filters-row {
         grid-template-columns: repeat(5, 1fr);
+    }
+
+    #panel-settings.active {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #panel-settings .card:has([data-i18n="settings.about"]) {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ── Dashboard drag & drop (desktop) ── */
+
+.drag-handle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: grab;
+    flex-shrink: 0;
+    padding: 0;
+    font-family: inherit;
+    transition: background var(--transition), color var(--transition);
+}
+
+.drag-handle:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.dashboard-widgets--draggable .drag-handle {
+    display: flex;
+}
+
+.dashboard-widget {
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboard-widget.is-dragging {
+    opacity: 0.55;
+    transform: scale(0.98);
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+}
+
+.dashboard-widget.drag-over {
+    outline: 2px dashed var(--primary);
+    outline-offset: 3px;
+}
+
+.dashboard-widgets--draggable .card-header::before {
+    content: none;
+}
+
+/* ── Landscape / short viewport ── */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    :root {
+        --nav-height: 56px;
+    }
+
+    .app-header {
+        padding-top: 10px;
+        padding-bottom: 8px;
+    }
+
+    .header-mini-balance {
+        padding: 6px 12px;
+    }
+
+    .modal {
+        align-items: flex-start;
+        padding-top: 12px;
+    }
+}
+
+/* ── Touch-friendly targets ── */
+
+@media (pointer: coarse) {
+    .nav-item,
+    .btn,
+    .method-tab,
+    .theme-tab,
+    .btn-icon {
+        min-height: 44px;
     }
 }

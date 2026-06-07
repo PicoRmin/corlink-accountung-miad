@@ -309,6 +309,10 @@ function destroyCharts() {
     })
 }
 
+export function resizeCharts() {
+    Object.values(chartInstances).forEach(ch => ch?.resize?.())
+}
+
 export function renderCharts() {
     destroyCharts()
 

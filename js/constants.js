@@ -23,10 +23,22 @@ export const TX_TYPES = ["income", "expense", "transfer"]
 
 export const TX_METHODS = ["cash", "check", "transfer"]
 
+export const DEFAULT_DASHBOARD_WIDGET_ORDER = [
+    "accounts",
+    "recent",
+    "checkSummary",
+    "financeChart",
+    "categoryChart",
+    "balanceChart",
+    "budget",
+    "checkReminder",
+]
+
 export const DEFAULT_SETTINGS = {
     language: "fa",
     colorTheme: "blue",
     onboardingDone: false,
     syncBinId: "",
     syncApiKey: "",
+    dashboardWidgetOrder: [...DEFAULT_DASHBOARD_WIDGET_ORDER],
 }

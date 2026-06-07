@@ -106,71 +106,82 @@
 
             <div id="monthCompareCards" class="compare-cards"></div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="dashboard.accounts">خلاصه حساب‌ها</h2>
+            <div id="dashboardWidgets" class="dashboard-widgets">
+                <div class="card dashboard-widget" data-widget-id="accounts">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="dashboard.accounts">خلاصه حساب‌ها</h2>
+                    </div>
+                    <div id="dashboardAccounts" class="dashboard-accounts-grid"></div>
                 </div>
-                <div id="dashboardAccounts" class="dashboard-accounts-grid"></div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="dashboard.recent">آخرین تراکنش‌ها</h2>
-                    <button type="button" class="btn-text" id="btnViewAllTx" data-i18n="dashboard.viewAll">مشاهده همه</button>
+                <div class="card dashboard-widget" data-widget-id="recent">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="dashboard.recent">آخرین تراکنش‌ها</h2>
+                        <button type="button" class="btn-text" id="btnViewAllTx" data-i18n="dashboard.viewAll">مشاهده همه</button>
+                    </div>
+                    <div id="recentTransactions" class="recent-tx-list"></div>
                 </div>
-                <div id="recentTransactions" class="recent-tx-list"></div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="dashboard.checkSummary">خلاصه چک‌ها</h2>
+                <div class="card dashboard-widget" data-widget-id="checkSummary">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="dashboard.checkSummary">خلاصه چک‌ها</h2>
+                    </div>
+                    <div id="checkSummary" class="check-summary-grid"></div>
                 </div>
-                <div id="checkSummary" class="check-summary-grid"></div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="chart.incomeExpense">دریافت و پرداخت</h2>
-                </div>
-                <div class="chart-wrap">
-                    <canvas id="financeChart"></canvas>
-                </div>
-                <div id="chartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="form.category">دسته‌بندی</h2>
+                <div class="card dashboard-widget" data-widget-id="financeChart">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="chart.incomeExpense">دریافت و پرداخت</h2>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                    <div id="chartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
                 </div>
-                <div class="chart-wrap">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                <div id="categoryChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="stats.balance">موجودی</h2>
+                <div class="card dashboard-widget" data-widget-id="categoryChart">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="form.category">دسته‌بندی</h2>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div id="categoryChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
                 </div>
-                <div class="chart-wrap chart-wrap-wide">
-                    <canvas id="balanceLineChart"></canvas>
-                </div>
-                <div id="balanceLineChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
-            </div>
 
-            <div id="budgetSection" class="card">
-                <div class="card-header">
-                    <h2 data-i18n="budget.title">بودجه‌بندی</h2>
+                <div class="card dashboard-widget dashboard-widget--wide" data-widget-id="balanceChart">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="stats.balance">موجودی</h2>
+                    </div>
+                    <div class="chart-wrap chart-wrap-wide">
+                        <canvas id="balanceLineChart"></canvas>
+                    </div>
+                    <div id="balanceLineChartEmpty" class="empty-state hidden" data-i18n="chart.empty">داده‌ای برای نمودار نیست</div>
                 </div>
-                <div id="budgetProgress" class="budget-progress-list"></div>
-                <div id="budgetEmpty" class="empty-state hidden" data-i18n="budget.limit">سقف ماهانه</div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="check.reminder">یادآوری چک</h2>
-                    <span class="badge" id="checkBadge">۰</span>
+                <div id="budgetSection" class="card dashboard-widget" data-widget-id="budget">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="budget.title">بودجه‌بندی</h2>
+                    </div>
+                    <div id="budgetProgress" class="budget-progress-list"></div>
+                    <div id="budgetEmpty" class="empty-state hidden" data-i18n="budget.limit">سقف ماهانه</div>
                 </div>
-                <div id="checkReminder" class="reminder-list"></div>
+
+                <div class="card dashboard-widget" data-widget-id="checkReminder">
+                    <div class="card-header">
+                        <button type="button" class="drag-handle" tabindex="-1" aria-hidden="true" title="جابجایی کارت">⠿</button>
+                        <h2 data-i18n="check.reminder">یادآوری چک</h2>
+                        <span class="badge" id="checkBadge">۰</span>
+                    </div>
+                    <div id="checkReminder" class="reminder-list"></div>
+                </div>
             </div>
         </section>
 

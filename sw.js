@@ -1,4 +1,4 @@
-const CACHE_NAME = "corlink-v3"
+const CACHE_NAME = "corlink-v4"
 
 const STATIC_ASSETS = [
     "./",
@@ -29,6 +29,7 @@ const STATIC_ASSETS = [
     "./js/calculator.js",
     "./js/constants.js",
     "./js/jalali.js",
+    "./js/dashboardLayout.js",
     "./locales/fa.json",
     "./locales/en.json",
 ]

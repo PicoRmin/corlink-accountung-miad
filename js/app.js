@@ -43,6 +43,7 @@ import {
     renderAccountSelector,
     renderTransactionsTable,
     renderCharts,
+    resizeCharts,
     renderBudgetSection,
     renderCheckReminders,
     renderAccountsList,
@@ -54,6 +55,7 @@ import {
 } from "./ui.js"
 import { initAllDatePickers, setTodayPickers, setPickerDate, clearPicker } from "./datePicker.js"
 import { addCategory } from "./categories.js"
+import { initDashboardLayout } from "./dashboardLayout.js"
 
 let currentPage = 1
 let editingTxId = null
@@ -800,8 +802,16 @@ export async function init() {
     initAllDatePickers()
     setTodayPickers()
 
+    initDashboardLayout({ onReorder: resizeCharts })
+
     render()
     showOnboarding({ switchPanel })
+
+    let resizeTimer
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer)
+        resizeTimer = setTimeout(resizeCharts, 150)
+    })
 }
 
 init().catch(err => {
