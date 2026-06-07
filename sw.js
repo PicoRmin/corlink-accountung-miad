@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
     "./js/theme.js",
     "./js/onboarding.js",
     "./js/shortcuts.js",
+    "./js/datePicker.js",
     "./js/notifications.js",
     "./js/calculator.js",
     "./js/constants.js",

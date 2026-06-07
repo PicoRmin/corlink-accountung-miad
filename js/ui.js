@@ -2,7 +2,9 @@ import { getTransactions, getBalance } from "./transactions.js"
 import { getActiveAccountId, getAccounts, getTotalBalance } from "./accounts.js"
 import { getCategories, getCategoryLabel, getExpenseByCategory } from "./categories.js"
 import { getAllBudgetUsage, getBudgetAlerts } from "./budget.js"
-import { getUpcomingChecks } from "./checks.js"
+import { getUpcomingChecks, getCheckSummary } from "./checks.js"
+import { getMonthlyComparison, getAccountSummary } from "./reports.js"
+import { getPickerISO, setPickerDate } from "./datePicker.js"
 import { calculateTotals, getKPIs, getMonthlyComparison, getBalanceTimeline } from "./reports.js"
 import { formatJalali, parseJalaliString, toISODate, monthKey } from "./jalali.js"
 import { PAGE_SIZE, CHECK_STATUSES } from "./constants.js"
@@ -80,8 +82,8 @@ export function getTxFilters() {
     const type = el("filterType")?.value ?? txFiltersState.type
     const method = el("filterMethod")?.value ?? txFiltersState.method
     const categoryId = el("filterCategory")?.value ?? txFiltersState.categoryId
-    const fromDateISO = parseFilterDate(el("filterFromDate")?.value ?? "")
-    const toDateISO = parseFilterDate(el("filterToDate")?.value ?? "")
+    const fromDateISO = getPickerISO("filterFromDatePicker") || parseFilterDate(el("filterFromDate")?.value ?? "")
+    const toDateISO = getPickerISO("filterToDatePicker") || parseFilterDate(el("filterToDate")?.value ?? "")
     const sortVal = el("sortBy")?.value ?? "date-desc"
     const { sortBy, sortDir } = parseSortValue(sortVal)
 
@@ -115,8 +117,10 @@ export function setTxFilters(filters = {}) {
 
 export function renderBalance(income, expense) {
     const accountId = getActiveAccountId()
+    const bal = getBalance(accountId)
     const balanceEl = el("balance")
-    if (balanceEl) balanceEl.textContent = formatMoney(getBalance(accountId))
+    if (balanceEl) balanceEl.textContent = formatMoney(bal)
+    if (el("miniBalance")) el("miniBalance").textContent = formatMoney(bal)
 
     if (income !== undefined && el("statIncome")) {
         el("statIncome").textContent = formatMoney(income)
@@ -509,16 +513,19 @@ export function renderAccountsList(onDelete) {
     const accounts = getAccounts()
     const activeId = getActiveAccountId()
 
-    list.innerHTML = accounts.map(acc => `
+    list.innerHTML = accounts.map(acc => {
+        const meta = [acc.bankName, acc.accountNumber, acc.sheba].filter(Boolean).join(" · ")
+        return `
         <div class="account-item ${acc.id === activeId ? "active" : ""}" data-account-id="${acc.id}">
             <span class="account-icon">${escapeHtml(acc.icon)}</span>
             <div class="account-info">
                 <strong>${escapeHtml(acc.name)}</strong>
                 <span>${formatMoney(getBalance(acc.id))}</span>
+                ${meta ? `<small class="account-meta">${escapeHtml(meta)}</small>` : ""}
             </div>
             ${accounts.length > 1 ? `<button type="button" class="btn-text account-delete" data-account-id="${acc.id}">${t("account.delete")}</button>` : ""}
-        </div>
-    `).join("")
+        </div>`
+    }).join("")
 
     if (onDelete) {
         list.querySelectorAll(".account-delete").forEach(btn => {
@@ -655,11 +662,12 @@ export function readFormData(prefix = "") {
     const p = prefix
     const type = el(fieldId(p, "type"))?.value || "expense"
     const method = el(fieldId(p, "method"))?.value || el("method")?.value || "cash"
-    const dateStr = el(fieldId(p, "txDate"))?.value || el(fieldId(p, "date"))?.value || ""
-    let dateISO = ""
-    let date = ""
+    const dateHidden = el(fieldId(p, "txDate")) || el(fieldId(p, "date"))
+    const dateStr = dateHidden?.value || ""
+    let dateISO = dateHidden?.dataset?.iso || ""
+    let date = dateStr
 
-    if (dateStr) {
+    if (!dateISO && dateStr) {
         try {
             dateISO = toISODate(parseJalaliString(dateStr))
             date = formatJalali(parseJalaliString(dateStr))
@@ -667,15 +675,16 @@ export function readFormData(prefix = "") {
             dateISO = toISODate(new Date())
             date = formatJalali(new Date())
         }
-    } else {
+    } else if (!dateStr && !dateISO) {
         dateISO = toISODate(new Date())
         date = formatJalali(new Date())
     }
 
-    const dueJalali = el(fieldId(p, "dueDateJalali"))?.value || el(fieldId(p, "dueDate"))?.value || ""
-    let dueDate = ""
-    let dueDateJalali = ""
-    if (dueJalali) {
+    const dueHidden = el(fieldId(p, "dueDateJalali"))
+    const dueJalali = dueHidden?.value || ""
+    let dueDate = dueHidden?.dataset?.iso || ""
+    let dueDateJalali = dueJalali
+    if (!dueDate && dueJalali) {
         try {
             dueDate = toISODate(parseJalaliString(dueJalali))
             dueDateJalali = formatJalali(parseJalaliString(dueJalali))
@@ -735,4 +744,70 @@ export function fillEditForm(tx) {
     set("editCategory", tx.categoryId)
     set("editAccount", tx.accountId)
     set("editTransferToAccount", tx.transferToAccountId)
+
+    setPickerDate("editDatePicker", tx.date)
+    setPickerDate("editDueDatePicker", tx.dueDateJalali || tx.dueDate || "")
+}
+
+export function renderDashboardExtras() {
+    const accountId = getActiveAccountId()
+    const comparison = getMonthlyComparison()
+    const changeSign = n => (n > 0 ? "+" : "")
+
+    const compareEl = el("monthCompareCards")
+    if (compareEl) {
+        compareEl.innerHTML = `
+        <div class="compare-card">
+            <span class="compare-label">${t("stats.income")} — ${comparison.currentMonth.replace("-", "/")}</span>
+            <strong class="compare-value income">${formatMoney(comparison.current.income)}</strong>
+            <span class="compare-change">${changeSign(comparison.change.income)}${comparison.change.income.toLocaleString("fa-IR")}٪ ${t("kpi.monthCompare")}</span>
+        </div>
+        <div class="compare-card">
+            <span class="compare-label">${t("stats.expense")} — ${comparison.currentMonth.replace("-", "/")}</span>
+            <strong class="compare-value expense">${formatMoney(comparison.current.expense)}</strong>
+            <span class="compare-change">${changeSign(comparison.change.expense)}${comparison.change.expense.toLocaleString("fa-IR")}٪ ${t("kpi.monthCompare")}</span>
+        </div>
+        <div class="compare-card">
+            <span class="compare-label">${t("stats.balance")}</span>
+            <strong class="compare-value">${formatMoney(comparison.current.net)}</strong>
+            <span class="compare-change">${changeSign(comparison.change.net)}${comparison.change.net.toLocaleString("fa-IR")}٪</span>
+        </div>`
+    }
+
+    const accountsGrid = el("dashboardAccounts")
+    if (accountsGrid) {
+        const summary = getAccountSummary()
+        accountsGrid.innerHTML = summary.map(a => `
+            <div class="dash-account-card ${a.id === accountId ? "active" : ""}">
+                <span class="dash-acc-icon">${escapeHtml(a.icon)}</span>
+                <strong>${escapeHtml(a.name)}</strong>
+                <span class="dash-acc-balance">${formatMoney(a.balance)}</span>
+                <small>+${formatMoney(a.income)} / −${formatMoney(a.expense)}</small>
+            </div>
+        `).join("") || `<div class="empty-state">${t("tx.empty")}</div>`
+    }
+
+    const recentEl = el("recentTransactions")
+    if (recentEl) {
+        const recent = getTransactions({ accountId, limit: 5 })
+        recentEl.innerHTML = recent.length
+            ? recent.map(tx => {
+                const sign = tx.type === "income" ? "+" : tx.type === "expense" ? "−" : "⇄"
+                return `<div class="recent-tx-item">
+                    <div><strong>${escapeHtml(tx.desc)}</strong><small>${escapeHtml(tx.date)}</small></div>
+                    <span class="${tx.type}">${sign}${formatMoney(tx.amount)}</span>
+                </div>`
+            }).join("")
+            : `<div class="empty-state">${t("tx.empty")}</div>`
+    }
+
+    const checkSumEl = el("checkSummary")
+    if (checkSumEl) {
+        const sum = getCheckSummary(accountId)
+        checkSumEl.innerHTML = `
+            <div class="check-stat"><span>${t("checkStatus.pending")}</span><strong>${sum.pending.toLocaleString("fa-IR")}</strong><small>${formatMoney(sum.pendingAmount)}</small></div>
+            <div class="check-stat"><span>${t("checkStatus.cleared")}</span><strong>${sum.cleared.toLocaleString("fa-IR")}</strong><small>${formatMoney(sum.clearedAmount)}</small></div>
+            <div class="check-stat"><span>${t("checkStatus.bounced")}</span><strong>${sum.bounced.toLocaleString("fa-IR")}</strong></div>
+        `
+    }
 }

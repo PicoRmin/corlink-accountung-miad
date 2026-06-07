@@ -2,31 +2,16 @@ import { loadDB, saveDB } from "./storage.js"
 import { t, applyI18n } from "./i18n.js"
 
 const STEPS = [
-    {
-        target: "#panel-dashboard",
-        titleKey: "onboarding.step1Title",
-        bodyKey: "onboarding.step1Body",
-    },
-    {
-        target: "#panel-add",
-        titleKey: "onboarding.step2Title",
-        bodyKey: "onboarding.step2Body",
-    },
-    {
-        target: "#panel-transactions",
-        titleKey: "onboarding.step3Title",
-        bodyKey: "onboarding.step3Body",
-    },
-    {
-        target: "#panel-settings",
-        titleKey: "onboarding.step4Title",
-        bodyKey: "onboarding.step4Body",
-    },
+    { panel: "dashboard", titleKey: "onboarding.step1Title", bodyKey: "onboarding.step1Body" },
+    { panel: "add", titleKey: "onboarding.step2Title", bodyKey: "onboarding.step2Body" },
+    { panel: "transactions", titleKey: "onboarding.step3Title", bodyKey: "onboarding.step3Body" },
+    { panel: "settings", titleKey: "onboarding.step4Title", bodyKey: "onboarding.step4Body" },
 ]
 
 let overlayEl = null
 let currentStep = 0
 let onCompleteCallback = null
+let switchPanelFn = null
 
 function createOverlay() {
     if (overlayEl) return overlayEl
@@ -41,8 +26,8 @@ function createOverlay() {
             <h2 class="onboarding-title"></h2>
             <p class="onboarding-body"></p>
             <div class="onboarding-actions">
-                <button type="button" class="btn-secondary onboarding-skip">${t("onboarding.skip")}</button>
-                <button type="button" class="btn-primary onboarding-next">${t("onboarding.next")}</button>
+                <button type="button" class="btn btn-secondary onboarding-skip">${t("onboarding.skip")}</button>
+                <button type="button" class="btn btn-primary onboarding-next">${t("onboarding.next")}</button>
             </div>
         </div>
     `
@@ -55,22 +40,11 @@ function createOverlay() {
     return overlayEl
 }
 
-function highlightTarget(selector) {
-    document.querySelectorAll(".onboarding-highlight").forEach(el => {
-        el.classList.remove("onboarding-highlight")
-    })
-
-    const target = document.querySelector(selector)
-    if (target) {
-        target.classList.add("onboarding-highlight")
-        target.scrollIntoView({ behavior: "smooth", block: "center" })
-    }
-    return target
-}
-
 function renderStep(index) {
     const step = STEPS[index]
     if (!step) return
+
+    if (switchPanelFn) switchPanelFn(step.panel)
 
     const overlay = createOverlay()
     overlay.querySelector(".onboarding-title").textContent = t(step.titleKey)
@@ -80,22 +54,17 @@ function renderStep(index) {
             .replace("{current}", index + 1)
             .replace("{total}", STEPS.length)
 
-    const nextBtn = overlay.querySelector(".onboarding-next")
-    nextBtn.textContent = index === STEPS.length - 1
-        ? t("onboarding.finish")
-        : t("onboarding.next")
+    overlay.querySelector(".onboarding-next").textContent =
+        index === STEPS.length - 1 ? t("onboarding.finish") : t("onboarding.next")
 
-    highlightTarget(step.target)
     overlay.classList.add("show")
+    document.body.classList.add("onboarding-open")
 }
 
 function nextStep() {
     currentStep += 1
-    if (currentStep >= STEPS.length) {
-        finishOnboarding()
-    } else {
-        renderStep(currentStep)
-    }
+    if (currentStep >= STEPS.length) finishOnboarding()
+    else renderStep(currentStep)
 }
 
 function finishOnboarding() {
@@ -103,12 +72,9 @@ function finishOnboarding() {
     db.settings.onboardingDone = true
     saveDB(db)
 
-    document.querySelectorAll(".onboarding-highlight").forEach(el => {
-        el.classList.remove("onboarding-highlight")
-    })
-
     if (overlayEl) {
         overlayEl.classList.remove("show")
+        document.body.classList.remove("onboarding-open")
         setTimeout(() => {
             overlayEl?.remove()
             overlayEl = null
@@ -118,10 +84,11 @@ function finishOnboarding() {
     if (onCompleteCallback) onCompleteCallback()
 }
 
-export function showOnboarding({ onComplete, force = false } = {}) {
+export function showOnboarding({ onComplete, force = false, switchPanel } = {}) {
     const db = loadDB()
     if (db.settings.onboardingDone && !force) return false
 
+    switchPanelFn = switchPanel || null
     onCompleteCallback = onComplete || null
     currentStep = 0
     applyI18n()

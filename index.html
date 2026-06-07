@@ -51,44 +51,9 @@
             <select id="accountSelector" class="account-selector" aria-label="انتخاب حساب"></select>
         </div>
 
-        <div class="balance-card">
-            <span class="balance-label" data-i18n="stats.balance">موجودی</span>
-            <div id="balance" class="balance-value">۰</div>
-            <div class="stats-row">
-                <div class="stat">
-                    <span class="stat-label" data-i18n="stats.income">دریافت</span>
-                    <span id="statIncome" class="stat-value income">۰</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-label" data-i18n="stats.expense">پرداخت</span>
-                    <span id="statExpense" class="stat-value expense">۰</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-label" data-i18n="stats.totalBalance">موجودی کل</span>
-                    <span id="statTotal" class="stat-value">۰</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="kpiRow" class="kpi-row">
-            <div class="kpi-card">
-                <span class="kpi-label" data-i18n="kpi.avgDailyExpense">میانگین هزینه روزانه</span>
-                <span id="kpiAvgDailyExpense" class="kpi-value">۰</span>
-            </div>
-            <div class="kpi-card">
-                <span class="kpi-label" data-i18n="kpi.maxIncome">بیشترین دریافت</span>
-                <span id="kpiMaxIncome" class="kpi-value income">۰</span>
-            </div>
-            <div class="kpi-card">
-                <span class="kpi-label" data-i18n="kpi.maxExpense">بیشترین پرداخت</span>
-                <span id="kpiMaxExpense" class="kpi-value expense">۰</span>
-            </div>
-            <div class="kpi-card">
-                <span class="kpi-label" data-i18n="kpi.monthCompare">مقایسه ماهانه</span>
-                <span id="kpiMonthCompare" class="kpi-value">—</span>
-            </div>
+        <div id="headerMiniBalance" class="header-mini-balance">
+            <span data-i18n="stats.balance">موجودی</span>
+            <strong id="miniBalance">۰</strong>
         </div>
     </header>
 
@@ -96,6 +61,72 @@
 
         <!-- داشبورد -->
         <section id="panel-dashboard" class="panel active" aria-label="داشبورد">
+
+            <div class="dashboard-hero">
+                <div class="balance-card">
+                    <span class="balance-label" data-i18n="stats.balance">موجودی</span>
+                    <div id="balance" class="balance-value">۰</div>
+                    <div class="stats-row">
+                        <div class="stat">
+                            <span class="stat-label" data-i18n="stats.income">دریافت</span>
+                            <span id="statIncome" class="stat-value income">۰</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat">
+                            <span class="stat-label" data-i18n="stats.expense">پرداخت</span>
+                            <span id="statExpense" class="stat-value expense">۰</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat">
+                            <span class="stat-label" data-i18n="stats.totalBalance">موجودی کل</span>
+                            <span id="statTotal" class="stat-value">۰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="kpiRow" class="kpi-row">
+                    <div class="kpi-card">
+                        <span class="kpi-label" data-i18n="kpi.avgDailyExpense">میانگین هزینه روزانه</span>
+                        <span id="kpiAvgDailyExpense" class="kpi-value">۰</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label" data-i18n="kpi.maxIncome">بیشترین دریافت</span>
+                        <span id="kpiMaxIncome" class="kpi-value income">۰</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label" data-i18n="kpi.maxExpense">بیشترین پرداخت</span>
+                        <span id="kpiMaxExpense" class="kpi-value expense">۰</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label" data-i18n="kpi.monthCompare">مقایسه ماهانه</span>
+                        <span id="kpiMonthCompare" class="kpi-value">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="monthCompareCards" class="compare-cards"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="dashboard.accounts">خلاصه حساب‌ها</h2>
+                </div>
+                <div id="dashboardAccounts" class="dashboard-accounts-grid"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="dashboard.recent">آخرین تراکنش‌ها</h2>
+                    <button type="button" class="btn-text" id="btnViewAllTx" data-i18n="dashboard.viewAll">مشاهده همه</button>
+                </div>
+                <div id="recentTransactions" class="recent-tx-list"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="dashboard.checkSummary">خلاصه چک‌ها</h2>
+                </div>
+                <div id="checkSummary" class="check-summary-grid"></div>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <h2 data-i18n="chart.incomeExpense">دریافت و پرداخت</h2>
@@ -180,26 +211,52 @@
                 </div>
 
                 <div class="filter-group">
-                    <label for="filterFromDate" data-i18n="form.date">تاریخ</label>
-                    <input id="filterFromDate" type="text" placeholder="۱۴۰۴/۰۱/۰۱" autocomplete="off">
+                    <label for="filterFromDate" data-i18n="filter.fromDate">از تاریخ</label>
+                    <div class="jalali-date-picker-wrap">
+                        <div class="jalali-date-picker" id="filterFromDatePicker" data-target="filterFromDate" data-optional="true"></div>
+                        <input type="hidden" id="filterFromDate">
+                    </div>
                 </div>
 
                 <div class="filter-group">
-                    <label for="filterToDate" data-i18n="form.date">تاریخ</label>
-                    <input id="filterToDate" type="text" placeholder="۱۴۰۴/۱۲/۲۹" autocomplete="off">
+                    <label for="filterToDate" data-i18n="filter.toDate">تا تاریخ</label>
+                    <div class="jalali-date-picker-wrap">
+                        <div class="jalali-date-picker" id="filterToDatePicker" data-target="filterToDate" data-optional="true"></div>
+                        <input type="hidden" id="filterToDate">
+                    </div>
                 </div>
 
                 <div class="filter-group">
-                    <label for="sortBy" data-i18n="tx.count">تعداد تراکنش</label>
+                    <label for="sortBy" data-i18n="filter.sort">مرتب‌سازی</label>
                     <select id="sortBy">
-                        <option value="date-desc" data-i18n="form.date">تاریخ</option>
-                        <option value="date-asc" data-i18n="form.date">تاریخ</option>
-                        <option value="amount-desc" data-i18n="form.amount">مبلغ (ریال)</option>
-                        <option value="amount-asc" data-i18n="form.amount">مبلغ (ریال)</option>
+                        <option value="date-desc" data-i18n="sort.newest">جدیدترین</option>
+                        <option value="date-asc" data-i18n="sort.oldest">قدیمی‌ترین</option>
+                        <option value="amount-desc" data-i18n="sort.amountHigh">بیشترین مبلغ</option>
+                        <option value="amount-asc" data-i18n="sort.amountLow">کمترین مبلغ</option>
                     </select>
                 </div>
 
                 <button type="button" id="btnClearFilters" class="btn btn-secondary" data-i18n="form.reset">پاک کردن</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="category.add">افزودن دسته‌بندی</h2>
+                </div>
+                <form id="addCategoryForm" class="form-grid inline-form">
+                    <div class="form-group">
+                        <label for="newCategoryName" data-i18n="form.desc">توضیحات</label>
+                        <input id="newCategoryName" type="text" placeholder="مثلاً: لوازم اداری">
+                    </div>
+                    <div class="form-group">
+                        <label for="newCategoryType" data-i18n="form.type">نوع</label>
+                        <select id="newCategoryType">
+                            <option value="expense" data-i18n="txType.expense">پرداخت</option>
+                            <option value="income" data-i18n="txType.income">دریافت</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btnAddCategory" class="btn btn-secondary" data-i18n="category.add">افزودن دسته‌بندی</button>
+                </form>
             </div>
 
             <div class="pagination-row">
@@ -273,9 +330,10 @@
                         <select id="txAccount"></select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="txDate" data-i18n="form.date">تاریخ</label>
-                        <input id="txDate" type="text" placeholder="1404/03/17" autocomplete="off">
+                    <div class="form-group jalali-date-picker-wrap">
+                        <label data-i18n="form.date">تاریخ</label>
+                        <div class="jalali-date-picker" id="txDatePicker" data-target="txDate"></div>
+                        <input type="hidden" id="txDate">
                     </div>
 
                     <div id="transferFields" class="transfer-fields hidden full">
@@ -304,9 +362,10 @@
                             <label for="bank" data-i18n="form.bank">بانک</label>
                             <input id="bank" placeholder="نام بانک">
                         </div>
-                        <div class="form-group full">
-                            <label for="dueDateJalali" data-i18n="form.dueDate">سررسید</label>
-                            <input id="dueDateJalali" type="text" placeholder="1404/06/01" autocomplete="off">
+                        <div class="form-group full jalali-date-picker-wrap">
+                            <label data-i18n="form.dueDate">سررسید</label>
+                            <div class="jalali-date-picker" id="dueDatePicker" data-target="dueDateJalali" data-optional="true"></div>
+                            <input type="hidden" id="dueDateJalali">
                         </div>
                     </div>
 
@@ -380,12 +439,24 @@
                     <h2 data-i18n="account.title">حساب‌ها</h2>
                 </div>
                 <ul id="accountsList" class="accounts-list"></ul>
-                <form id="addAccountForm" class="form-grid inline-form">
-                    <div class="form-group">
-                        <label for="accountName" data-i18n="account.add">افزودن حساب</label>
-                        <input id="accountName" type="text" placeholder="نام حساب">
+                <form id="addAccountForm" class="form-grid">
+                    <div class="form-group full">
+                        <label for="accountName" data-i18n="account.name">نام صاحب حساب</label>
+                        <input id="accountName" type="text" placeholder="نام صاحب حساب" required>
                     </div>
-                    <button type="button" id="btnAddAccount" class="btn btn-secondary" data-i18n="account.add">افزودن حساب</button>
+                    <div class="form-group">
+                        <label for="accountNumber" data-i18n="account.number">شماره حساب</label>
+                        <input id="accountNumber" type="text" inputmode="numeric" placeholder="اختیاری">
+                    </div>
+                    <div class="form-group">
+                        <label for="accountSheba" data-i18n="account.sheba">شماره شبا</label>
+                        <input id="accountSheba" type="text" placeholder="IR… (اختیاری)">
+                    </div>
+                    <div class="form-group full">
+                        <label for="accountBank" data-i18n="account.bank">نام بانک</label>
+                        <input id="accountBank" type="text" placeholder="اختیاری">
+                    </div>
+                    <button type="button" id="btnAddAccount" class="btn btn-secondary full" data-i18n="account.add">افزودن حساب</button>
                 </form>
                 <hr class="card-divider">
                 <h3 class="card-subtitle" data-i18n="account.transfer">انتقال بین حساب‌ها</h3>
@@ -473,8 +544,18 @@
 
             <div class="card">
                 <div class="card-header">
+                    <h2 data-i18n="settings.dataStorage">ذخیره‌سازی داده</h2>
+                </div>
+                <p class="card-desc" data-i18n="settings.dataStorageDesc">داده‌ها در مرورگر شما (localStorage) ذخیره می‌شوند. با پاک کردن cache مرورگر ممکن است از بین بروند — حتماً پشتیبان بگیرید.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
                     <h2 data-i18n="settings.sync">همگام‌سازی ابری</h2>
                 </div>
+                <p class="card-desc">
+                    <a href="docs/SYNC.md" class="doc-link" data-i18n="settings.syncGuide">راهنمای همگام‌سازی ابری</a>
+                </p>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="syncBinId" data-i18n="settings.binId">شناسه JSONBin</label>
@@ -501,9 +582,9 @@
                 <div class="card-header">
                     <h2 data-i18n="check.reminder">یادآوری چک</h2>
                 </div>
-                <p class="card-desc">برای دریافت اعلان سررسید چک، مجوز نوتیفیکیشن را فعال کنید.</p>
+                <p class="card-desc" data-i18n="settings.notificationDesc">با فعال‌سازی، مرورگر برای چک‌های نزدیک به سررسید (۵ روز آینده) اعلان می‌دهد.</p>
                 <button type="button" id="btnEnableNotifications" class="btn btn-secondary full">
-                    🔔 فعال‌سازی اعلان چک
+                    🔔 <span data-i18n="settings.enableNotifications">فعال‌سازی اعلان چک</span>
                 </button>
             </div>
 
@@ -519,7 +600,9 @@
                 <p class="card-desc">
                     <a href="docs/TECHNICAL.md" class="doc-link">مستندات فنی</a>
                     ·
-                    <a href="docs/IDEAS.md" class="doc-link">پیشنهادات و ایده‌ها</a>
+                    <a href="docs/SYNC.md" class="doc-link" data-i18n="settings.syncGuide">راهنمای همگام‌سازی</a>
+                    ·
+                    <a href="docs/IDEAS.md" class="doc-link">پیشنهادات</a>
                 </p>
             </div>
         </section>
@@ -581,9 +664,10 @@
                     <label for="editAccount" data-i18n="form.account">حساب</label>
                     <select id="editAccount"></select>
                 </div>
-                <div class="form-group">
-                    <label for="editDate" data-i18n="form.date">تاریخ</label>
-                    <input id="editDate" type="text" placeholder="1404/03/17" autocomplete="off">
+                <div class="form-group jalali-date-picker-wrap">
+                    <label data-i18n="form.date">تاریخ</label>
+                    <div class="jalali-date-picker" id="editDatePicker" data-target="editDate"></div>
+                    <input type="hidden" id="editDate">
                 </div>
                 <div id="editTransferFields" class="transfer-fields hidden full">
                     <div class="form-group full">
@@ -609,9 +693,10 @@
                         <label for="editBank" data-i18n="form.bank">بانک</label>
                         <input id="editBank">
                     </div>
-                    <div class="form-group full">
-                        <label for="editDueDateJalali" data-i18n="form.dueDate">سررسید</label>
-                        <input id="editDueDateJalali" type="text" placeholder="1404/06/01" autocomplete="off">
+                    <div class="form-group full jalali-date-picker-wrap">
+                        <label data-i18n="form.dueDate">سررسید</label>
+                        <div class="jalali-date-picker" id="editDueDatePicker" data-target="editDueDateJalali" data-optional="true"></div>
+                        <input type="hidden" id="editDueDateJalali">
                     </div>
                 </div>
                 <div class="modal-actions">

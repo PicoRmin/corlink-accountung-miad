@@ -18,6 +18,9 @@ function createDefaultAccount() {
         id: generateId("acc"),
         name: "حساب اصلی",
         icon: "💰",
+        accountNumber: "",
+        sheba: "",
+        bankName: "",
     }
 }
 

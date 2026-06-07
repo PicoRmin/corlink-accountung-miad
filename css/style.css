@@ -119,9 +119,17 @@ body {
 .app-header {
     background: var(--header-bg);
     color: #fff;
-    padding: 20px 16px 28px;
-    border-radius: 0 0 28px 28px;
-    box-shadow: var(--shadow-lg);
+    padding: 16px 16px 12px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: var(--shadow-md);
+}
+
+.app-main {
+    max-width: 720px;
+    margin: 12px auto 0;
+    padding: 0 16px;
+    position: relative;
+    z-index: 1;
 }
 
 .header-top {
@@ -129,7 +137,7 @@ body {
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .brand {
@@ -219,14 +227,6 @@ body {
 }
 
 /* ── Main ── */
-
-.app-main {
-    max-width: 720px;
-    margin: -12px auto 0;
-    padding: 0 16px;
-    position: relative;
-    z-index: 1;
-}
 
 .panel {
     display: none;
@@ -1605,15 +1605,260 @@ body.pulling::before {
 }
 
 @media (max-width: 640px) {
-    .kpi-row {
-        grid-template-columns: 1fr 1fr;
-    }
-
     .stats-row {
         flex-wrap: wrap;
     }
 
     .stat-divider:nth-child(4) {
         display: none;
+    }
+}
+
+/* ── Compact header mini balance ── */
+
+.header-mini-balance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.header-mini-balance strong {
+    font-size: 1rem;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+body[data-active-panel="dashboard"] .header-mini-balance {
+    display: none;
+}
+
+/* ── Dashboard hero (inside panel) ── */
+
+.dashboard-hero {
+    margin-bottom: 16px;
+}
+
+.dashboard-hero .balance-card {
+    background: var(--header-bg);
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.dashboard-hero .kpi-row {
+    margin-top: 0;
+}
+
+.dashboard-hero .kpi-card {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboard-hero .kpi-label {
+    opacity: 1;
+    color: var(--text-muted);
+}
+
+/* ── Jalali date picker ── */
+
+.jalali-date-picker {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 0.8fr;
+    gap: 8px;
+}
+
+.jalali-date-picker select {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+}
+
+/* ── Compare cards ── */
+
+.compare-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+.compare-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.compare-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.compare-value.income { color: var(--income); }
+.compare-value.expense { color: var(--expense); }
+
+.compare-change {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* ── Dashboard widgets ── */
+
+.dashboard-accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.dash-account-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    text-align: center;
+}
+
+.dash-account-card.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.dash-acc-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.dash-acc-balance {
+    display: block;
+    font-weight: 700;
+    direction: ltr;
+    unicode-bidi: isolate;
+    margin: 4px 0;
+}
+
+.recent-tx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.recent-tx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.recent-tx-item:last-child {
+    border-bottom: none;
+}
+
+.recent-tx-item small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.recent-tx-item .income { color: var(--income); font-weight: 600; }
+.recent-tx-item .expense { color: var(--expense); font-weight: 600; }
+
+.check-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.check-stat {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.check-stat span {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.check-stat strong {
+    display: block;
+    font-size: 1.1rem;
+}
+
+.check-stat small {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.account-meta {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Onboarding fix (centered, no scroll trap) ── */
+
+.onboarding-overlay {
+    align-items: center;
+    padding-bottom: 16px;
+}
+
+body.onboarding-open {
+    overflow: hidden;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* ── Modal mobile fix ── */
+
+@media (max-width: 640px) {
+    .modal {
+        align-items: flex-start;
+        padding-top: 24px;
+    }
+
+    .modal-content {
+        max-height: calc(100dvh - var(--nav-height) - 48px);
+    }
+
+    .compare-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .check-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 641px) {
+    .compare-cards {
+        grid-template-columns: repeat(3, 1fr);
     }
 }

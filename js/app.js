@@ -48,9 +48,12 @@ import {
     renderAccountsList,
     renderBudgetList,
     populateFormSelects,
+    renderDashboardExtras,
     fillEditForm,
     readFormData,
 } from "./ui.js"
+import { initAllDatePickers, setTodayPickers, setPickerDate, clearPicker } from "./datePicker.js"
+import { addCategory } from "./categories.js"
 
 let currentPage = 1
 let editingTxId = null
@@ -76,7 +79,8 @@ export function switchPanel(name) {
         navBtn.setAttribute("aria-current", "page")
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    document.body.dataset.activePanel = name
+    window.scrollTo({ top: 0, behavior: "auto" })
 }
 
 // ── Toast ──
@@ -120,11 +124,13 @@ export function showToast(msg, { undo = false, onUndo } = {}) {
 // ── Modals ──
 
 function showModal(id) {
+    document.body.classList.add("modal-open")
     document.getElementById("modalOverlay")?.classList.remove("hidden")
     document.getElementById(id)?.classList.remove("hidden")
 }
 
 function hideModals() {
+    document.body.classList.remove("modal-open")
     document.getElementById("modalOverlay")?.classList.add("hidden")
     document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"))
     editingTxId = null
@@ -161,11 +167,8 @@ function resetForm() {
     document.querySelectorAll(".method-tab").forEach(tab => {
         tab.classList.toggle("active", tab.dataset.method === "cash")
     })
-    const txDate = document.getElementById("txDate")
-    if (txDate) {
-        const { jy, jm, jd } = todayJalali()
-        txDate.value = `${jy}/${String(jm).padStart(2, "0")}/${String(jd).padStart(2, "0")}`
-    }
+    setPickerDate("txDatePicker", null)
+    clearPicker("dueDatePicker")
     toggleFormFields()
 }
 
@@ -310,15 +313,30 @@ function clearFilters() {
         sortBy: "dateISO",
         sortDir: "desc",
     })
-    const ids = ["search", "filterType", "filterMethod", "filterCategory", "filterFromDate", "filterToDate"]
-    ids.forEach(id => {
+    ;["search", "filterType", "filterMethod", "filterCategory"].forEach(id => {
         const node = document.getElementById(id)
         if (node) node.value = ""
     })
+    clearPicker("filterFromDatePicker")
+    clearPicker("filterToDatePicker")
     const sortBy = document.getElementById("sortBy")
     if (sortBy) sortBy.value = "date-desc"
     currentPage = 1
     renderTransactions()
+}
+
+function handleAddCategory() {
+    const name = document.getElementById("newCategoryName")?.value?.trim()
+    const type = document.getElementById("newCategoryType")?.value || "expense"
+    if (!name) {
+        showToast(t("error.required"))
+        return
+    }
+    const key = `custom-${Date.now()}`
+    addCategory({ key, icon: "📁", type, name })
+    document.getElementById("newCategoryName").value = ""
+    render()
+    showToast(t("category.add") + " ✓")
 }
 
 function goPage(delta) {
@@ -337,8 +355,16 @@ function handleAddAccount() {
         showToast(t("error.required"))
         return
     }
-    addAccount({ name })
+    addAccount({
+        name,
+        accountNumber: document.getElementById("accountNumber")?.value?.trim() || "",
+        sheba: document.getElementById("accountSheba")?.value?.trim() || "",
+        bankName: document.getElementById("accountBank")?.value?.trim() || "",
+    })
     document.getElementById("accountName").value = ""
+    document.getElementById("accountNumber").value = ""
+    document.getElementById("accountSheba").value = ""
+    document.getElementById("accountBank").value = ""
     render()
     showToast(t("account.add") + " ✓")
 }
@@ -575,6 +601,7 @@ export function render() {
     renderCharts()
     renderBudgetSection()
     renderCheckReminders()
+    renderDashboardExtras()
     renderTransactions()
     renderAccountsList(handleDeleteAccount)
     renderBudgetList(handleDeleteBudget)
@@ -645,6 +672,8 @@ function wireEvents() {
     })
 
     document.getElementById("btnAddAccount")?.addEventListener("click", handleAddAccount)
+    document.getElementById("btnAddCategory")?.addEventListener("click", handleAddCategory)
+    document.getElementById("btnViewAllTx")?.addEventListener("click", () => switchPanel("transactions"))
     document.getElementById("btnTransfer")?.addEventListener("click", handleAccountTransfer)
     document.getElementById("btnSetBudget")?.addEventListener("click", handleSetBudget)
 
@@ -768,14 +797,11 @@ export async function init() {
     initShortcuts(switchPanel, showToast)
     initCheckNotifications()
 
-    const txDate = document.getElementById("txDate")
-    if (txDate && !txDate.value) {
-        const { jy, jm, jd } = todayJalali()
-        txDate.value = `${jy}/${String(jm).padStart(2, "0")}/${String(jd).padStart(2, "0")}`
-    }
+    initAllDatePickers()
+    setTodayPickers()
 
     render()
-    showOnboarding()
+    showOnboarding({ switchPanel })
 }
 
 init()

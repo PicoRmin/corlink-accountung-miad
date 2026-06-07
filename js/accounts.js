@@ -26,11 +26,14 @@ export function getAccountById(id) {
     return loadDB().accounts.find(a => a.id === id) || null
 }
 
-export function addAccount({ name, icon = "💰" }) {
+export function addAccount({ name, icon = "💰", accountNumber = "", sheba = "", bankName = "" }) {
     const account = {
         id: generateId("acc"),
         name: name.trim(),
         icon,
+        accountNumber: accountNumber.trim(),
+        sheba: sheba.trim(),
+        bankName: bankName.trim(),
     }
     updateDB(db => {
         db.accounts.push(account)

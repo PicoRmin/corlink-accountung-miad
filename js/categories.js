@@ -12,10 +12,11 @@ export function getCategoryById(id) {
 
 export function getCategoryLabel(category) {
     if (!category) return ""
+    if (category.name) return category.name
     return t(`category.${category.key}`, category.key)
 }
 
-export function addCategory({ key, icon, type = "expense" }) {
+export function addCategory({ key, icon, type = "expense", name }) {
     let created = null
     updateDB(db => {
         created = {
@@ -23,6 +24,7 @@ export function addCategory({ key, icon, type = "expense" }) {
             key,
             icon,
             type,
+            name: name || key,
         }
         db.categories.push(created)
     })
